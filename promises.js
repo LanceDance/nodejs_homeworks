@@ -7,5 +7,6 @@ new Promise (function(resolve, reject) {
         ) => {
       resolve(body.vehicles)
 })}).then(function(value) {
-    value.map(urls => getCars)});
+    value.map(urls => getCars.getCars)});
+
 
