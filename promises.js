@@ -2,11 +2,9 @@ const getCars = require('./project_1');
 const request = require('request');
 const URL = 'http://swapi.co/api/people/1'
 
-let promise1 = new Promise (function(resolve, reject) {
+new Promise (function(resolve, reject) {
     request(URL, { json: true }, (err, res, body,
         ) => {
-      resolve(body.vehicles)
+      resolve(body.vehicles).then(function(value) {
+        value.map(urls => getCars)})
 })});
-
-promise1.then(function(value) {
-value.map(urls => getCars)})
