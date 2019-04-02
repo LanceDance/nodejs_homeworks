@@ -1,4 +1,4 @@
-const getCars = require('./project_1');
+const getCars = require('./callbacks');
 const request = require('request');
 const URL = 'http://swapi.co/api/people/1'
 
@@ -8,3 +8,4 @@ new Promise (function(resolve, reject) {
       resolve(body.vehicles)
 })}).then(function(value) {
     value.map(urls => getCars)});
+
