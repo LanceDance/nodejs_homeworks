@@ -21,23 +21,16 @@ ctx.body = movies;
 });
 
 function getSingleMovie(id) {
-    try {
     let OneMovie = movies.find(movie => movie.id == id);
-    return OneMovie[0];
-    }
-    catch(err) {
-    const OneMovie = 0;
     return OneMovie;
-    }
 }
 const charAndSpace = '/:id([0-9]{3,})';
 router.get(charAndSpace, async (ctx) => {
     try {
       let movie = await getSingleMovie(ctx.params.id);
-      console.log(movie)
-      console.log(ctx.params.id)
+      console.log(movie);
 
-      if (movie.id = 0)
+      if (typeof(movie) != 'undefined')
       {
       ctx.body = {
         status: 'success',
@@ -55,7 +48,13 @@ router.get(charAndSpace, async (ctx) => {
     }
   })
   
+function addMovie(name, year, rating) {
+  newId = movies[movies.length - 1].id
+  newId ++;
+  movies.push({'id': newId, 'name': name, 'year': year, 'rating': rating})
 
+
+}
 
   router.post('/', async (ctx) => {
     try {
