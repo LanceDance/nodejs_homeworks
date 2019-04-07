@@ -1,6 +1,7 @@
 const Koa = require('koa');
 const logger = require('koa-logger');
 const Router = require('koa-router');
+const bodyParser = require('koa-bodyparser');
 const app = new Koa();
 const router = new Router({
     prefix: '/movies'
@@ -15,6 +16,11 @@ const movies = [
  ];
 
 app.use(logger());
+
+app.use(bodyParser({
+  multipart: true,
+  urlencoded: true
+}));
 router.get('/', (ctx, next) =>
 {
 ctx.body = movies;
@@ -51,13 +57,14 @@ router.get(charAndSpace, async (ctx) => {
 function addMovie(name, year, rating) {
   newId = movies[movies.length - 1].id
   newId ++;
-  movies.push({'id': newId, 'name': name, 'year': year, 'rating': rating})
-
+  movies.push({'id': newId, 'name': name, 'year': year, 'rating': rating});
+  console.log(movies);
 
 }
 
   router.post('/', async (ctx) => {
     try {
+      console.log(ctx.request.body);
       const movie = await addMovie(ctx.request.body);
       if (movie.length) {
         ctx.status = 201;
