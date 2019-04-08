@@ -16,6 +16,7 @@ const movies = [
     {id: 104, name: "12 Angry Men", year: 1957, rating: 8.9}
  ];
 
+ let iterator = movies.map(a => a.id);
 app.use(logger());
  
 router.get('/', (ctx, next) =>
@@ -137,20 +138,28 @@ router.patch('/:id', koaBody(), async (ctx) => {
   try {
     let changeAtributes = ctx.request.body;
     let keysAtributes = Object.keys(changeAtributes);
-    if (keysAtributes.includes('name') || keysAtributes.includes('year') || keysAtributes.includes('rating')) {
-      const movie = await updateMovie(ctx.params.id, changeAtributes);
-      ctx.status = 200;
-      ctx.body = {
-        status: 'success',
-        data: movies
-      };
-    } else {
+    if (iterator.includes(parseInt(ctx.params.id))) {
+      if (keysAtributes.includes('name') || keysAtributes.includes('year') || keysAtributes.includes('rating')) {
+        const movie = await updateMovie(ctx.params.id, changeAtributes);
+        ctx.status = 200;
+        ctx.body = {
+          status: 'success',
+          data: movies
+        };
+      } else {
+        ctx.status = 404;
+        ctx.body = {
+          status: 'error',
+          message: 'That parameter doesnt exist. Choose between year, name, rating.'
+        };
+      }}
+    else {
       ctx.status = 404;
       ctx.body = {
         status: 'error',
-        message: 'That parameter doesnt exist. Choose between year, name, rating.'
-      };
+        message: 'The id of the film is not in db'
     }
+  };
   } catch (err) {
     ctx.status = 400;
     ctx.body = {
