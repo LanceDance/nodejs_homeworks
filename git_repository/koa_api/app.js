@@ -31,7 +31,6 @@ const charAndSpace = '/:id([0-9]{3,})';
 router.get(charAndSpace, async (ctx) => {
     try {
       let movie = await getSingleMovie(ctx.params.id);
-      console.log(movie);
 
       if (typeof(movie) != 'undefined')
       {
@@ -52,83 +51,114 @@ router.get(charAndSpace, async (ctx) => {
   })
   
 function addMovie(body) {
-  console.log(body);
-  console.log(typeof(body));
   let newId = movies[movies.length - 1].id;
   newId ++;
   movies.push({'id': newId, 'name': body.name, 'year': body.year, 'rating': body.rating});
-  console.log(movies);
 
 }
 
-  router.post('/', koaBody(), async (ctx) => {
-    try {
-     // console.log(dataForMovie);
-     console.log(ctx.request.body);
-      let propertiesOfMovie = ctx.request.body;
-      let lenghtOfNewMovie = Object.keys(propertiesOfMovie).length;
-      console.log(propertiesOfMovie.length);
-      if (lenghtOfNewMovie == 3) {
-      await addMovie(propertiesOfMovie);
-        ctx.status = 201;
-        ctx.body = {
-          status: 'success',
-          data: movies
-        };
-      } else {
-        ctx.status = 400;
-        ctx.body = {
-          status: 'error',
-          message: 'Sorry, but new object has to have name, year, rating.'
-        };
-      }
-    } catch (err) {
-      console.log(err)
-    }
-  })
-  
-  function deleteMovie(id) {
-    let index = movies.findIndex(x => x.id ==id)
-    console.log(index);
-    if (index != -1)
-    {
-      movies.splice(index,1);
-      return movies;
-    }
-    else 
-    {
-      return 0;
-    }
-  }
-
-  router.delete('/:id', async (ctx) =>{
-    try {
-      console.log(ctx.params.id);
-      const movie = await deleteMovie(ctx.params.id);
-      if (movie != 0) {
-        ctx.status = 200;
-        ctx.body = {
-          status: 'success',
-          data: movie
-        };
-      } else {
-        ctx.status = 404;
-        ctx.body = {
-          status: 'error',
-          message: 'That movie does not exist.'
-        };
-      }
-    } catch (err) {
+router.post('/', koaBody(), async (ctx) => {
+  try {
+    // console.log(dataForMovie);
+    let propertiesOfMovie = ctx.request.body;
+    let lenghtOfNewMovie = Object.keys(propertiesOfMovie).length;
+    if (lenghtOfNewMovie == 3) {
+    await addMovie(propertiesOfMovie);
+      ctx.status = 201;
+      ctx.body = {
+        status: 'success',
+        data: movies
+      };
+    } else {
       ctx.status = 400;
       ctx.body = {
         status: 'error',
-        message: err.message || 'Sorry, an error has occurred.'
+        message: 'Sorry, but new object has to have name, year, rating.'
       };
     }
+  } catch (err) {
+    console.log(err)
+  }
+})
 
+function deleteMovie(id) {
+  let index = movies.findIndex(x => x.id ==id)
+  if (index != -1)
+  {
+    movies.splice(index,1);
+    return movies;
+  }
+  else 
+  {
+    return 0;
+  }
+}
 
+router.delete('/:id', async (ctx) =>{
+  try {
+    const movie = await deleteMovie(ctx.params.id);
+    if (movie != 0) {
+      ctx.status = 200;
+      ctx.body = {
+        status: 'success',
+        data: movie
+      };
+    } else {
+      ctx.status = 404;
+      ctx.body = {
+        status: 'error',
+        message: 'That movie does not exist.'
+      };
+    }
+  } catch (err) {
+    ctx.status = 400;
+    ctx.body = {
+      status: 'error',
+      message: err.message || 'Sorry, an error has occurred.'
+    };
+  }
+});
 
-  })
+function updateMovie(id, body)
+{
+  let index = movies.findIndex(x => x.id ==id)
+  if (index != -1)
+  {
+    if (Object.keys(body)[0] in movies[index]) {
+      Object.assign(movies[index],body)
+    }
+  }
+  else 
+  {
+    return 0;
+  }
+}
+router.patch('/:id', koaBody(), async (ctx) => {
+  try {
+    let changeAtributes = ctx.request.body;
+    let keysAtributes = Object.keys(changeAtributes);
+    if (keysAtributes.includes('name') || keysAtributes.includes('year') || keysAtributes.includes('rating')) {
+      const movie = await updateMovie(ctx.params.id, changeAtributes);
+      ctx.status = 200;
+      ctx.body = {
+        status: 'success',
+        data: movies
+      };
+    } else {
+      ctx.status = 404;
+      ctx.body = {
+        status: 'error',
+        message: 'That parameter doesnt exist. Choose between year, name, rating.'
+      };
+    }
+  } catch (err) {
+    ctx.status = 400;
+    ctx.body = {
+      status: 'error',
+      message: err.message || 'Sorry, an error has occurred.'
+    };
+  }
+})
 app.use(router.routes());
 app.use(router.allowedMethods());
 app.listen(3000);
