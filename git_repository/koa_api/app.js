@@ -1,7 +1,7 @@
+'use strict'
 const Koa = require('koa');
-const logger = require('koa-logger');
+const logger = require('koa-pino-logger')
 const Router = require('koa-router');
-const bodyParser = require('koa-bodyparser');
 const app = new Koa();
 const koaBody = require('koa-body');
 const router = new Router({
@@ -17,8 +17,6 @@ const movies = [
  ];
 
 app.use(logger());
-
-// app.use(bodyParser());
  
 router.get('/', (ctx, next) =>
 {
@@ -56,7 +54,7 @@ router.get(charAndSpace, async (ctx) => {
 function addMovie(body) {
   console.log(body);
   console.log(typeof(body));
-  newId = movies[movies.length - 1].id
+  let newId = movies[movies.length - 1].id;
   newId ++;
   movies.push({'id': newId, 'name': body.name, 'year': body.year, 'rating': body.rating});
   console.log(movies);
@@ -66,20 +64,22 @@ function addMovie(body) {
   router.post('/', koaBody(), async (ctx) => {
     try {
      // console.log(dataForMovie);
-     let propertiesOfMovie = ctx.request.body
+     console.log(ctx.request.body);
+      let propertiesOfMovie = ctx.request.body;
+      let lenghtOfNewMovie = Object.keys(propertiesOfMovie).length;
       console.log(propertiesOfMovie.length);
-      const movie = await addMovie(propertiesOfMovie);
-      if (propertiesOfMovie.length == 3) {
+      if (lenghtOfNewMovie == 3) {
+      await addMovie(propertiesOfMovie);
         ctx.status = 201;
         ctx.body = {
           status: 'success',
-          data: movie
+          data: movies
         };
       } else {
         ctx.status = 400;
         ctx.body = {
           status: 'error',
-          message: 'Something went wrong.'
+          message: 'Sorry, but new object has to have name, year, rating.'
         };
       }
     } catch (err) {
@@ -87,6 +87,48 @@ function addMovie(body) {
     }
   })
   
+  function deleteMovie(id) {
+    let index = movies.findIndex(x => x.id ==id)
+    console.log(index);
+    if (index != -1)
+    {
+      movies.splice(index,1);
+      return movies;
+    }
+    else 
+    {
+      return 0;
+    }
+  }
+
+  router.delete('/:id', async (ctx) =>{
+    try {
+      console.log(ctx.params.id);
+      const movie = await deleteMovie(ctx.params.id);
+      if (movie != 0) {
+        ctx.status = 200;
+        ctx.body = {
+          status: 'success',
+          data: movie
+        };
+      } else {
+        ctx.status = 404;
+        ctx.body = {
+          status: 'error',
+          message: 'That movie does not exist.'
+        };
+      }
+    } catch (err) {
+      ctx.status = 400;
+      ctx.body = {
+        status: 'error',
+        message: err.message || 'Sorry, an error has occurred.'
+      };
+    }
+
+
+
+  })
 app.use(router.routes());
 app.use(router.allowedMethods());
 app.listen(3000);
