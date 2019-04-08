@@ -16,7 +16,6 @@ const movies = [
     {id: 104, name: "12 Angry Men", year: 1957, rating: 8.9}
  ];
 
- let iterator = movies.map(a => a.id);
 app.use(logger());
  
 router.get('/', (ctx, next) =>
@@ -136,6 +135,7 @@ function updateMovie(id, body)
 }
 router.patch('/:id', koaBody(), async (ctx) => {
   try {
+    let iterator = movies.map(id => id.id);
     let changeAtributes = ctx.request.body;
     let keysAtributes = Object.keys(changeAtributes);
     if (iterator.includes(parseInt(ctx.params.id))) {
